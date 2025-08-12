@@ -97,45 +97,47 @@ class Project:
 
         :return: whether the path should be ignored
         """
-        abs_path = os.path.join(self.project_root, relative_path)
-        file_exists = os.path.exists(abs_path)
-
-        if not file_exists:
-            # For non-existent files, check the parent directory instead
-            parent_dir = os.path.dirname(abs_path)
-            if not os.path.exists(parent_dir):
-                raise FileNotFoundError(f"File and Parent directory {parent_dir} not found, the ignore check cannot be performed")
-            # Use parent directory for subsequent checks
-            abs_path = parent_dir
-            is_file = False  # Treat as directory since we're checking the parent
-        else:
-            # Check file extension if it's a file
-            is_file = os.path.isfile(abs_path)
-
-        # Only check file extensions for existing files
-        if file_exists and is_file and ignore_non_source_files:
-            fn_matcher = self.language.get_source_fn_matcher()
-            if not fn_matcher.is_relevant_filename(abs_path):
-                return True
-
-        # Create normalized path for consistent handling
-        rel_path = Path(relative_path)
-
-        # always ignore paths inside .git
-        if len(rel_path.parts) > 0 and rel_path.parts[0] == ".git":
-            return True
-
-        # Check each part of the path against always fulfilled ignore conditions
-        dir_parts = rel_path.parts
-        if is_file:
-            dir_parts = dir_parts[:-1]
-        for part in dir_parts:
-            if not part:  # Skip empty parts (e.g., from leading '/')
-                continue
-            if self._is_ignored_dirname(part):
-                return True
-
-        return match_path(str(relative_path), self.get_ignore_spec(), root_path=self.project_root)
+        return False
+        #
+        # abs_path = os.path.join(self.project_root, relative_path)
+        # file_exists = os.path.exists(abs_path)
+        #
+        # if not file_exists:
+        #     # For non-existent files, check the parent directory instead
+        #     parent_dir = os.path.dirname(abs_path)
+        #     if not os.path.exists(parent_dir):
+        #         raise FileNotFoundError(f"File and Parent directory {parent_dir} not found, the ignore check cannot be performed")
+        #     # Use parent directory for subsequent checks
+        #     abs_path = parent_dir
+        #     is_file = False  # Treat as directory since we're checking the parent
+        # else:
+        #     # Check file extension if it's a file
+        #     is_file = os.path.isfile(abs_path)
+        #
+        # # Only check file extensions for existing files
+        # if file_exists and is_file and ignore_non_source_files:
+        #     fn_matcher = self.language.get_source_fn_matcher()
+        #     if not fn_matcher.is_relevant_filename(abs_path):
+        #         return True
+        #
+        # # Create normalized path for consistent handling
+        # rel_path = Path(relative_path)
+        #
+        # # always ignore paths inside .git
+        # if len(rel_path.parts) > 0 and rel_path.parts[0] == ".git":
+        #     return True
+        #
+        # # Check each part of the path against always fulfilled ignore conditions
+        # dir_parts = rel_path.parts
+        # if is_file:
+        #     dir_parts = dir_parts[:-1]
+        # for part in dir_parts:
+        #     if not part:  # Skip empty parts (e.g., from leading '/')
+        #         continue
+        #     if self._is_ignored_dirname(part):
+        #         return True
+        #
+        # return match_path(str(relative_path), self.get_ignore_spec(), root_path=self.project_root)
 
     def is_ignored_path(self, path: str | Path, ignore_non_source_files: bool = False) -> bool:
         """
